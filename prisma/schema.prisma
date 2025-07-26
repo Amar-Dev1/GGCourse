@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+model User {
+  user_id String @id() @default(uuid())
+  name String
+  email String
+  password String
+  username String @unique()
+  role Role @default(STUDENT)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+  courses Course[]
+  enrollments Enrollment[]
+  reviews Review[]
+}
+
+model Course {
+  course_id String @id() @default(uuid())
+  title String 
+  description String
+  price Int
+  instructorId String
+  instructor User @relation(fields: [instructorId], references: [user_id], onDelete: Cascade)
+  enrollments Enrollment[]
+  reviews Review[]
+}
+
+model Enrollment {
+  enrollment_id String @id() @default(uuid())
+  userId String @unique()
+  courseId String @unique()
+  user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
+  enrolled_at DateTime @default(now())
+
+  @@unique([userId, courseId])
+}
+
+model Review {
+  review_id String @id @default(uuid())
+  userId String
+  courseId String
+  user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
+  created_at DateTime @default(now())
+
+  @@unique([userId, courseId])
+}
