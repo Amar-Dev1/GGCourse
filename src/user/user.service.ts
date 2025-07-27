@@ -8,7 +8,6 @@ const prisma = new PrismaClient();
 @Injectable()
 export class UserService {
   async createUser(data: CreateUserDto) {
-    // try {
     if (!data.password || typeof data.password !== 'string') {
       throw new Error('Password is required and must be a string');
     }
