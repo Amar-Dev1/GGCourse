@@ -45,6 +45,7 @@ model Enrollment {
   courseId String
   user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
   course Course @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
+  completed Boolean @default(false)
   enrolled_at DateTime @default(now())
 
   @@unique([userId, courseId])

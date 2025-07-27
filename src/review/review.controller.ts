@@ -1,34 +1,39 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/create-review.dto';
-import { UpdateReviewDto } from './dto/update-review.dto';
 
-@Controller('review')
+@Controller('reviews')
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
-  @Post()
-  create(@Body() createReviewDto: CreateReviewDto) {
-    return this.reviewService.create(createReviewDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.reviewService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reviewService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
-    return this.reviewService.update(+id, updateReviewDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reviewService.remove(+id);
-  }
+   @Post()
+    async create(@Body() data: CreateReviewDto) {
+      const result = await this.reviewService.create(data);
+      return { message: 'review made successfuly !', data: result };
+    }
+  
+    @Get()
+    async findAll() {
+      const data = await this.reviewService.findAll();
+      return {
+        data: data,
+      };
+    }
+  
+    @Get(':id')
+    async findOne(@Param() params: { id: string }) {
+      const data = await this.reviewService.findOne(params.id);
+      return {
+        data: data,
+      };
+    }
+  
+    @Delete(':id')
+    async delete(@Param() params: { id: string }) {
+      const data = await this.reviewService.delete(params.id);
+      return {
+        message: 'removed a review Successfuly !',
+        data: data,
+      };
+    }
 }

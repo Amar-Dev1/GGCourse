@@ -36,6 +36,15 @@ export class EnrollmentController {
     };
   }
 
+  @Patch(':id')
+async update(@Body() data, @Param() params:{id:string}){
+const enrollment = await this.enrollmentService.updateEnrollment(params.id, data)
+return {
+  message:"Updated successfuly !",
+  data:enrollment
+}
+}
+
   @Delete(':id')
   async delete(@Param() params: { id: string }) {
     const data = await this.enrollmentService.delete(params.id);

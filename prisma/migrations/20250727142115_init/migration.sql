@@ -29,6 +29,7 @@ CREATE TABLE `Enrollment` (
     `enrollment_id` VARCHAR(191) NOT NULL,
     `userId` VARCHAR(191) NOT NULL,
     `courseId` VARCHAR(191) NOT NULL,
+    `completed` BOOLEAN NOT NULL DEFAULT false,
     `enrolled_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `Enrollment_userId_courseId_key`(`userId`, `courseId`),

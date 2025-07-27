@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class CreateEnrollmentDto {
   @IsNotEmpty({ message: 'userId should be defined' })
@@ -9,4 +9,7 @@ export class CreateEnrollmentDto {
   @IsString()
   courseId: string;
 
+  @IsOptional()
+  @IsNotEmpty()
+  completed:boolean;
 }
