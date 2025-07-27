@@ -5,7 +5,7 @@ CREATE TABLE `User` (
     `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `username` VARCHAR(191) NOT NULL,
-    `role` ENUM('STUDENT', 'INSTRUCTOR', 'ADMIN') NOT NULL DEFAULT 'STUDENT',
+    `role` ENUM('STUDENT', 'INSTRUCTOR', 'ADMIN') NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
@@ -31,8 +31,6 @@ CREATE TABLE `Enrollment` (
     `courseId` VARCHAR(191) NOT NULL,
     `enrolled_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    UNIQUE INDEX `Enrollment_userId_key`(`userId`),
-    UNIQUE INDEX `Enrollment_courseId_key`(`courseId`),
     UNIQUE INDEX `Enrollment_userId_courseId_key`(`userId`, `courseId`),
     PRIMARY KEY (`enrollment_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

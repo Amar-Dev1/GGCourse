@@ -20,7 +20,7 @@ model User {
   email String
   password String
   username String @unique()
-  role Role @default(STUDENT)
+  role Role
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
   courses Course[]
@@ -41,8 +41,8 @@ model Course {
 
 model Enrollment {
   enrollment_id String @id() @default(uuid())
-  userId String @unique()
-  courseId String @unique()
+  userId String
+  courseId String
   user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
   course Course @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
   enrolled_at DateTime @default(now())

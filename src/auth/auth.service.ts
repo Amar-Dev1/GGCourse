@@ -13,19 +13,20 @@ export class AuthService {
 
   async register(data: CreateUserDto): Promise<any> {
     const user = await this.userService.findOneByEmail(data.email);
-    if (user) throw new HttpException('user already exists', HttpStatus.BAD_REQUEST);
-    
+    if (user !== null && user)
+      throw new HttpException('user already exists', HttpStatus.BAD_REQUEST);
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    let result = await this.userService.createUser({
+
+    const result = await this.userService.createUser({
       name: data.name,
       email: data.email,
       username: data.username,
       role: data.role,
       password: hashedPassword,
     });
-
+    console.log('after result');
     const { password, created_at, updated_at, ...finalResult } = result;
-
     return finalResult;
   }
 

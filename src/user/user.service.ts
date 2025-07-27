@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaClient } from 'generated/prisma';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -9,9 +9,17 @@ const prisma = new PrismaClient();
 export class UserService {
   async createUser(data: CreateUserDto) {
     if (!data.password || typeof data.password !== 'string') {
-      throw new Error('Password is required and must be a string');
+      throw new HttpException('Password is required and must be a string', HttpStatus.BAD_REQUEST);
     }
-    const user = await prisma.user.create({ data });
+    const user = await prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        username: data.username,
+        role: data.role,
+        password: data.password,
+      },
+    });    
     return user;
   }
   async findAll() {
@@ -25,23 +33,31 @@ export class UserService {
       where: { user_id: id },
       include: { enrollments: true, reviews: true },
     });
+
+    if (!user) return null;
     return user;
   }
   async findOneByEmail(email: string) {
     const user = await prisma.user.findFirst({
       where: { email: email },
-      include: { enrollments: true, reviews: true },
     });
+    console.log(user);
+    if (!user) return false;
     return user;
   }
 
-  async updateUser(id: string, data: UpdateUserDto) {
+  async updateUser(id: string | any, data: UpdateUserDto) {
     // 1. checking user first
     const user = await prisma.user.findUnique({ where: { user_id: id } });
-    if (!user) throw new Error('user not found');
+    if (!user) return null;
     const updatedUser = await prisma.user.update({
       where: { user_id: id },
-      data: data,
+      data: {
+        name: data.name,
+        email: data.email,
+        username: data.username,
+        role: data.role,
+      },
     });
     return updatedUser;
   }
@@ -50,7 +66,7 @@ export class UserService {
       where: { user_id: id },
       include: { enrollments: true, reviews: true },
     });
-    if (!user) throw new Error('user not found');
+    if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
     await prisma.user.delete({ where: { user_id: id } });
     return 'Deleted Successfuly';
   }

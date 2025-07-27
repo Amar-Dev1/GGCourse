@@ -1,34 +1,47 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { EnrollmentService } from './enrollment.service';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
-import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
 
-@Controller('enrollment')
+@Controller('enrollments')
 export class EnrollmentController {
   constructor(private readonly enrollmentService: EnrollmentService) {}
 
   @Post()
-  create(@Body() createEnrollmentDto: CreateEnrollmentDto) {
-    return this.enrollmentService.create(createEnrollmentDto);
+  async create(@Body() data: CreateEnrollmentDto) {
+    const result = await this.enrollmentService.create(data);
+    return { message: 'enrollment issued successfuly !', data: result };
   }
 
   @Get()
-  findAll() {
-    return this.enrollmentService.findAll();
+  async findAll() {
+    const data = await this.enrollmentService.findAll();
+    return {
+      data: data,
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.enrollmentService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEnrollmentDto: UpdateEnrollmentDto) {
-    return this.enrollmentService.update(+id, updateEnrollmentDto);
+  async findOne(@Param() params: { id: string }) {
+    const data = await this.enrollmentService.findOne(params.id);
+    return {
+      data: data,
+    };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.enrollmentService.remove(+id);
+  async delete(@Param() params: { id: string }) {
+    const data = await this.enrollmentService.delete(params.id);
+    return {
+      message: 'Unenrolled Successfuly !',
+      data: data,
+    };
   }
 }
