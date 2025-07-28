@@ -1,17 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
-import { PrismaClient } from 'generated/prisma';
 import { updateEnrollmentDto } from './dto/update-enrollment.dto';
-
-const prisma = new PrismaClient();
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class EnrollmentService {
+  constructor(private prisma:PrismaService){}
+  
   async create(data: CreateEnrollmentDto) {
-    const user = await prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { user_id: data.userId },
     });
-    const course = await prisma.course.findUnique({
+    const course = await this.prisma.course.findUnique({
       where: { course_id: data.courseId },
     });
     if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
@@ -24,7 +24,7 @@ export class EnrollmentService {
         HttpStatus.FORBIDDEN,
       );
 
-    const enrollment = await prisma.enrollment.create({
+    const enrollment = await this.prisma.enrollment.create({
       data: {
         userId: user.user_id,
         courseId: course.course_id,
@@ -33,12 +33,12 @@ export class EnrollmentService {
     return enrollment;
   }
   async findAll() {
-    const enrollments = await prisma.enrollment.findMany();
+    const enrollments = await this.prisma.enrollment.findMany();
     return enrollments;
   }
 
   async findOne(id: string) {
-    const enrollment = await prisma.enrollment.findUnique({
+    const enrollment = await this.prisma.enrollment.findUnique({
       where: { enrollment_id: id },
     });
     return enrollment;
@@ -51,7 +51,7 @@ export class EnrollmentService {
         'You are not enrolled in this course',
         HttpStatus.NOT_FOUND,
       );
-    const updated_enrollment = await prisma.enrollment.update({
+    const updated_enrollment = await this.prisma.enrollment.update({
       where: { enrollment_id: id },
       data: { completed: data.completed },
     });
@@ -59,7 +59,7 @@ export class EnrollmentService {
   }
 
   async delete(id: string) {
-    const enrollment = await prisma.enrollment.findUnique({
+    const enrollment = await this.prisma.enrollment.findUnique({
       where: { enrollment_id: id },
     });
     if (!enrollment)
@@ -67,7 +67,7 @@ export class EnrollmentService {
         'You are not enrolled in this course',
         HttpStatus.NOT_FOUND,
       );
-    const deleted_enrollment = await prisma.enrollment.delete({
+    const deleted_enrollment = await this.prisma.enrollment.delete({
       where: { enrollment_id: id },
     });
     return deleted_enrollment;

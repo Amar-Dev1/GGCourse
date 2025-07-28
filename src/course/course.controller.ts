@@ -7,15 +7,18 @@ import {
   Param,
   Delete,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 
 @Controller('courses')
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
+  @UseGuards(AuthGuard)
   @Post()
   async create(@Body() data: CreateCourseDto) {
     const result = await this.courseService.createCourse(data);
@@ -25,12 +28,14 @@ export class CourseController {
     };
   }
 
+  @UseGuards(AuthGuard)
   @Get()
   async findAll() {
     const courses = await this.courseService.findAll();
     return { courses: courses };
   }
 
+  @UseGuards(AuthGuard)
   @Get(':id')
   async findOne(@Param() params: { id: string }) {
     const course = await this.courseService.findOne(params.id);
@@ -39,6 +44,7 @@ export class CourseController {
     };
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
   async update(@Param() params: { id: string }, @Body() data: UpdateCourseDto) {
     const updated_course = await this.courseService.updateCourse(
@@ -49,6 +55,7 @@ export class CourseController {
     return { message: 'course updated successfuly !', data: updated_course };
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
   async remove(@Param() params: { id: string }) {
     const deleted_course = await this.courseService.deleteCourse(params.id);

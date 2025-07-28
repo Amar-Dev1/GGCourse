@@ -1,16 +1,16 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { PrismaClient } from 'generated/prisma';
-
-const prisma = new PrismaClient();
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class CourseService {
   
+constructor(private prisma:PrismaService){}
+
   async createCourse(data: CreateCourseDto) {
     // 1. Check user role
-    const user = await prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { user_id: data.instructorId },
       include:{enrollments:true, reviews:true},
     });
@@ -26,7 +26,7 @@ export class CourseService {
     }
 
     // 2. create the course
-    const result = await prisma.course.create({
+    const result = await this.prisma.course.create({
       data: {
         title: data.title,
         description: data.description,
@@ -39,14 +39,14 @@ export class CourseService {
   }
 
   async findAll() {
-    const result = await prisma.course.findMany({
+    const result = await this.prisma.course.findMany({
       include:{enrollments:true, reviews:true},
     });
     return result;
   }
 
   async findOne(id: string) {
-    const course = await prisma.course.findUnique({
+    const course = await this.prisma.course.findUnique({
       where: { course_id: id },
       include:{enrollments:true, reviews:true},
     });
@@ -55,14 +55,14 @@ export class CourseService {
   }
 
   async updateCourse(id: string, data: UpdateCourseDto) {
-    const course = await prisma.course.findUnique({
+    const course = await this.prisma.course.findUnique({
       where: { course_id: id },
       include:{enrollments:true, reviews:true},
     });
 
     if (!course) throw new Error('course not found');
 
-    const result = await prisma.course.update({
+    const result = await this.prisma.course.update({
       where: { course_id: id },
       data: data,
     });
@@ -70,12 +70,12 @@ export class CourseService {
   }
 
   async deleteCourse(id: string) {
-    const course = await prisma.course.findUnique({
+    const course = await this.prisma.course.findUnique({
       where: { course_id: id },
       include:{enrollments:true, reviews:true},
     });
     if (!course) throw new Error('course not found');
-    await prisma.course.delete({ where: { course_id: id } });
+    await this.prisma.course.delete({ where: { course_id: id } });
     return course;
   }
 }

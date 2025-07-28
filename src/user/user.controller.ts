@@ -1,28 +1,58 @@
-import { Controller, Get, Patch, Param, Body, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Param,
+  Body,
+  UseGuards,
+  Delete,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
 
+  @UseGuards(AuthGuard)
   @Get()
-  async findAll() {
+  async findAll(@CurrentUser() user) {
+    if (user.role !== 'ADMIN')
+      throw new UnauthorizedException('Only Admins can see all users');
     const result = await this.userService.findAll();
     return { data: result };
   }
+  @UseGuards(AuthGuard)
   @Get(':id')
   async findOne(@Param() params: { id: string }) {
     const result = await this.userService.findOneById(params.id);
     return { data: result };
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
   async updateUser(
     @Body() data: UpdateUserDto,
-    @Param() prams: { id: string },
+    @Param() params: { id: string },
+    @CurrentUser() user,
   ) {
-    const result = await this.userService.updateUser(prams.id, data);
+    if (params.id !== user.id) throw new UnauthorizedException('Acess denined');
+
+    const result = await this.userService.updateUser(params.id, data);
     return { message: 'updated Successfuly !', data: result };
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  async deleteUser(@Param() params: { id: string }, @CurrentUser() user) {
+    if (params.id !== user.id) throw new UnauthorizedException('Acess denined');
+    const result = await this.userService.deleteUser(params.id);
+    return {
+      message: 'deleted successfuly !',
+      data: result,
+    };
   }
 }

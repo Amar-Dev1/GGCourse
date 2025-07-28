@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcryptjs';
-import { JwtService } from './JwtService';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -19,26 +19,32 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const result = await this.userService.createUser({
-      name: data.name,
-      email: data.email,
-      username: data.username,
-      role: data.role,
+      ...data,
       password: hashedPassword,
     });
     console.log('after result');
-    const { password, created_at, updated_at, ...finalResult } = result;
-    return finalResult;
+    const { password, ...rest } = result;
+    return rest;
   }
 
-  async signIn(data: { email: string; password: string }): Promise<any> {
+  async validateUser(data: { email: string; password: string }) {
     const user = await this.userService.findOneByEmail(data.email);
     if (!user) throw new Error('user not found');
 
     const matchedPassword = await bcrypt.compare(data.password, user.password);
-    if (!matchedPassword) throw new Error('Invalid credintials');
+    if (!matchedPassword)
+      throw new HttpException('Invalid credintials', HttpStatus.BAD_REQUEST);
 
-    const token = this.jwtService.generateToken(user.user_id);
-    const { password, updated_at, ...finalData } = user;
-    return { finalData, token };
+    return user;
+  }
+
+  async signIn(data: { email: string; password: string }): Promise<any> {
+    const user = await this.validateUser(data);
+
+    const tokenPayload = { sub: user.user_id, username: user.username };
+
+    return {
+      access_token: await this.jwtService.signAsync(tokenPayload),
+    };
   }
 }
