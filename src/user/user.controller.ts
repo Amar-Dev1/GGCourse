@@ -20,18 +20,20 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Get()
   async findAll(@CurrentUser() user) {
-    if (user.role !== 'ADMIN')
+    if (user.role !== 'ADMIN') {
       throw new UnauthorizedException('Only Admins can see all users');
+    }
     const result = await this.userService.findAll();
     return { data: result };
   }
   @UseGuards(AuthGuard)
   @Get(':id')
-  async findOne(@Param() params: { id: string }) {
-    const result = await this.userService.findOneById(params.id);
+  async findOne(@Param() params: { id: string }, @CurrentUser() user) {
+    if (user.role !== 'ADMIN' && params.id !== user.id) throw new UnauthorizedException("Access denied")
+      const result = await this.userService.findOneById(params.id);
     return { data: result };
   }
-
+  
   @UseGuards(AuthGuard)
   @Patch(':id')
   async updateUser(
@@ -39,7 +41,7 @@ export class UserController {
     @Param() params: { id: string },
     @CurrentUser() user,
   ) {
-    if (params.id !== user.id) throw new UnauthorizedException('Acess denined');
+    if (user.role !== 'ADMIN' && params.id !== user.id) throw new UnauthorizedException('Access denined');
 
     const result = await this.userService.updateUser(params.id, data);
     return { message: 'updated Successfuly !', data: result };
@@ -48,7 +50,7 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Delete(':id')
   async deleteUser(@Param() params: { id: string }, @CurrentUser() user) {
-    if (params.id !== user.id) throw new UnauthorizedException('Acess denined');
+    if (user.role !== 'ADMIN' && params.id !== user.id) throw new UnauthorizedException('Access denined');
     const result = await this.userService.deleteUser(params.id);
     return {
       message: 'deleted successfuly !',

@@ -8,7 +8,7 @@ async function main() {
     data: {
       user_id: 'user-admin-0001',
       name: 'Admin User',
-      email: 'admin@example.com',
+      email: 'admin@gmail.com',
       password: 'pass',
       username: 'adminuser',
       role: 'ADMIN',
@@ -19,7 +19,7 @@ async function main() {
     data: {
       user_id: 'user-instructor-0001',
       name: 'Instructor User',
-      email: 'instructor@example.com',
+      email: 'instructor@gmail.com',
       password: 'pass',
       username: 'instructoruser',
       role: 'INSTRUCTOR',
@@ -30,7 +30,7 @@ async function main() {
     data: {
       user_id: 'user-student-0001',
       name: 'Student User',
-      email: 'student@example.com',
+      email: 'student@gmail.com',
       password: 'pass',
       username: 'studentuser',
       role: 'STUDENT',
