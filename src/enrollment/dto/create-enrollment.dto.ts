@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateEnrollmentDto {
   @IsNotEmpty({ message: 'userId should be defined' })
@@ -10,6 +11,7 @@ export class CreateEnrollmentDto {
   courseId: string;
 
   @IsOptional()
-  @IsNotEmpty()
-  completed:boolean;
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
+  completed: boolean;
 }

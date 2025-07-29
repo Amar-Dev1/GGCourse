@@ -5,9 +5,10 @@ import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class EnrollmentService {
-  constructor(private prisma:PrismaService){}
-  
-  async create(data: CreateEnrollmentDto) {
+  constructor(private prisma: PrismaService) {}
+
+  // ✔
+  async enroll(data: CreateEnrollmentDto) {
     const user = await this.prisma.user.findUnique({
       where: { user_id: data.userId },
     });
@@ -18,11 +19,11 @@ export class EnrollmentService {
     if (!course)
       throw new HttpException('course not found', HttpStatus.NOT_FOUND);
 
-    if (user?.role !== 'STUDENT')
-      throw new HttpException(
-        'You MUST switch to STUDENT role',
-        HttpStatus.FORBIDDEN,
-      );
+    // if (user?.role !== 'STUDENT')
+    //   throw new HttpException(
+    //     'You MUST switch to STUDENT account',
+    //     HttpStatus.FORBIDDEN,
+    //   );
 
     const enrollment = await this.prisma.enrollment.create({
       data: {
@@ -32,43 +33,74 @@ export class EnrollmentService {
     });
     return enrollment;
   }
-  async findAll() {
-    const enrollments = await this.prisma.enrollment.findMany();
+
+  // ✔
+  async findAllByCourseId(course_id: string) {
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { courseId: course_id },
+    });
     return enrollments;
   }
 
-  async findOne(id: string) {
+  // ✔
+  async findAllByStudentId(student_id: string) {
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { userId: student_id },
+    });
+    return enrollments;
+  }
+
+  // ✔
+  async findOneByStudentId(enrollment_id: string) {
     const enrollment = await this.prisma.enrollment.findUnique({
-      where: { enrollment_id: id },
+      where: { enrollment_id: enrollment_id },
     });
     return enrollment;
   }
 
-  async updateEnrollment(id: string, data: updateEnrollmentDto) {
-    const enrollment = await this.findOne(id);
+  async findOneById(enrollment_id: string) {
+    const enrollment = await this.prisma.enrollment.findUnique({
+      where: { enrollment_id: enrollment_id },
+    });
+    return enrollment;
+  }
+
+  async updateEnrollment(
+    enrollment_id: string,
+    // student_id: string,
+    completed: boolean,
+  ) {
+    const enrollment = await this.prisma.enrollment.findUnique({
+      where: { enrollment_id: enrollment_id },
+    });
+    console.log(enrollment);
     if (!enrollment)
       throw new HttpException(
         'You are not enrolled in this course',
         HttpStatus.NOT_FOUND,
       );
+
     const updated_enrollment = await this.prisma.enrollment.update({
-      where: { enrollment_id: id },
-      data: { completed: data.completed },
+      where: { enrollment_id: enrollment_id },
+      data: { completed: completed },
     });
+
     return updated_enrollment;
   }
 
-  async delete(id: string) {
-    const enrollment = await this.prisma.enrollment.findUnique({
-      where: { enrollment_id: id },
+  async delete(enrollment_id: string) {
+   const enrollment = await this.prisma.enrollment.findUnique({
+      where: { enrollment_id: enrollment_id },
     });
+
+
     if (!enrollment)
       throw new HttpException(
         'You are not enrolled in this course',
         HttpStatus.NOT_FOUND,
       );
     const deleted_enrollment = await this.prisma.enrollment.delete({
-      where: { enrollment_id: id },
+      where: { enrollment_id: enrollment_id },
     });
     return deleted_enrollment;
   }

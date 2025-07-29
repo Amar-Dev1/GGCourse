@@ -8,66 +8,128 @@ import {
   Delete,
   UseGuards,
   UnauthorizedException,
+  HttpException,
+  NotFoundException,
 } from '@nestjs/common';
 import { EnrollmentService } from './enrollment.service';
-import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { updateEnrollmentDto } from './dto/update-enrollment.dto';
 
+@UseGuards(AuthGuard)
 @Controller('enrollments')
 export class EnrollmentController {
   constructor(private readonly enrollmentService: EnrollmentService) {}
 
+  // Student routes
+
   @UseGuards(AuthGuard)
-  @Post()
-  async create(@Body() data: CreateEnrollmentDto) {
-    const result = await this.enrollmentService.create(data);
+  @Post('/:course_id')
+  async enroll(@Param('course_id') courseId: string, @CurrentUser() user) {
+    if (user.role === 'INSTRUCTOR') {
+      throw new UnauthorizedException('Only students can enroll');
+    }
+
+    const result = await this.enrollmentService.enroll({
+      courseId,
+      userId: user.userId,
+      completed: false,
+    });
+    console.log('result:', result);
+
     return { message: 'enrollment issued successfuly !', data: result };
   }
-  @UseGuards(AuthGuard)
-  @Get()
-  async findAll() {
-    const data = await this.enrollmentService.findAll();
-    return {
-      data: data,
-    };
+
+  @Get('me')
+  async findAllByStudentId(@CurrentUser() user) {
+    if (user.role === 'INSTRUCTOR') {
+      throw new UnauthorizedException('Access denied');
+    } else {
+      return {
+        data: await this.enrollmentService.findAllByStudentId(user.userId),
+      };
+    }
   }
-  @UseGuards(AuthGuard)
-  @Get(':id')
-  async findOne(@Param() params: { id: string }, @CurrentUser() user) {
-    if (params.id !== user.id) throw new UnauthorizedException('Acess denied');
-    const data = await this.enrollmentService.findOne(params.id);
+
+  @Get(':enrollment_id')
+  async findOne(@Param('enrollment_id') id: string, @CurrentUser() user) {
+    if (user.role === 'INSTRUCTOR') {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    const enrollment = await this.enrollmentService.findOneById(id);
+
+    if (!enrollment) throw new NotFoundException('enrollment not found');
+    if (enrollment.userId !== user.userId) {
+      throw new UnauthorizedException('Access denied');
+    }
+
     return {
-      data: data,
+      data: await this.enrollmentService.findOneByStudentId(id),
     };
   }
 
-  @Patch(':id')
+  @Patch(':enrollment_id')
   async update(
-    @Body() data,
-    @Param() params: { id: string },
+    @Body() data: updateEnrollmentDto,
+    @Param('enrollment_id') id: string,
     @CurrentUser() user,
   ) {
-    if (params.id !== user.id) throw new UnauthorizedException('Acess denied');
+    if (user.role === 'INSTRUCTOR') {
+      throw new UnauthorizedException('Access denied');
+    }
 
-    const enrollment = await this.enrollmentService.updateEnrollment(
-      params.id,
-      data,
-    );
+    const enrollment = await this.enrollmentService.findOneById(id);
+
+    if (!enrollment) throw new NotFoundException('enrollment not found');
+
+    if (enrollment.userId !== user.userId) {
+      throw new UnauthorizedException('Access denied');
+    }
+
     return {
       message: 'Updated successfuly !',
-      data: enrollment,
+      data: await this.enrollmentService.updateEnrollment(
+        id,
+        // user.userId,
+        data.completed,
+      ),
     };
   }
 
-  @Delete(':id')
-  async delete(@Param() params: { id: string }, @CurrentUser() user) {
-    if (params.id !== user.id) throw new UnauthorizedException('Acess denied');
+  @Delete(':enrollment_id')
+  async delete(@Param('enrollment_id') id: string, @CurrentUser() user) {
+    if (user.role === 'INSTRUCTOR') {
+      throw new UnauthorizedException('Access denied');
+    }
 
-    const data = await this.enrollmentService.delete(params.id);
+    const enrollment = await this.enrollmentService.findOneById(id);
+    if (!enrollment) throw new NotFoundException('enrollment not found');
+    if (enrollment.userId !== user.userId) {
+      throw new UnauthorizedException('Access denied');
+    }
     return {
       message: 'Unenrolled Successfuly !',
-      data: data,
+      data: await this.enrollmentService.delete(id),
+    };
+  }
+
+  // Instructor routes
+
+  @Get('/course/:course_id')
+  async findAllByCourse(
+    @Param() params: { course_id: string },
+    @CurrentUser() user,
+  ) {
+    if (user.role === 'STUDENT') {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    const enrollments = await this.enrollmentService.findAllByCourseId(
+      params.course_id,
+    );
+    return {
+      data: enrollments,
     };
   }
 }

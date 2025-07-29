@@ -1,6 +1,8 @@
-import { IsNotEmpty } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean } from 'class-validator';
 
 export class updateEnrollmentDto {
-  @IsNotEmpty()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
   completed: boolean;
 }

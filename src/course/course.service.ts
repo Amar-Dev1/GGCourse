@@ -74,7 +74,7 @@ constructor(private prisma:PrismaService){}
       where: { course_id: id },
       include:{enrollments:true, reviews:true},
     });
-    if (!course) throw new Error('course not found');
+    if (!course) throw new HttpException('course not found', HttpStatus.NOT_FOUND);
     await this.prisma.course.delete({ where: { course_id: id } });
     return course;
   }
