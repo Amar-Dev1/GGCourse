@@ -9,12 +9,14 @@ import {
   Res,
   UseGuards,
   UnauthorizedException,
+  Query,
 } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { PaginatedCourseDto } from './dto/paginated-course.dto';
 
 @Controller('courses')
 export class CourseController {
@@ -31,12 +33,28 @@ export class CourseController {
       data: result,
     };
   }
-
-  @UseGuards(AuthGuard)
+  
+  // @UseGuards(AuthGuard)
   @Get()
-  async findAll() {
-    const courses = await this.courseService.findAll();
+  async findAll(@Query() query: PaginatedCourseDto) {
+    const courses = await this.courseService.findAll(query);
     return { courses: courses };
+  }
+  
+  // only student can access
+  @UseGuards(AuthGuard)
+  @Get('me')
+  async findByStudentId(@CurrentUser() user) {
+
+      console.log(user);
+      if (user.role !== 'STUDENT')
+        throw new UnauthorizedException('Acces denied');
+  
+      const courses = await this.courseService.findByStudentId(user.userId);
+      return {
+        data: courses,
+      };
+    
   }
 
   @UseGuards(AuthGuard)
@@ -56,12 +74,10 @@ export class CourseController {
     @CurrentUser() user,
   ) {
     console.log(user);
-    
-    
+
     if (user.role === 'STUDENT')
-    
       throw new UnauthorizedException('Access denied');
-    
+
     const updated_course = await this.courseService.updateCourse(
       params.id,
       data,
