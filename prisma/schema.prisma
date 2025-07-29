@@ -54,6 +54,7 @@ model Review {
   review_id String @id @default(uuid())
   userId String
   courseId String
+  rating Int @default(0)
   user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
   course Course @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
   created_at DateTime @default(now())

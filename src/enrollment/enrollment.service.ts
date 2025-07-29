@@ -1,13 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
-import { updateEnrollmentDto } from './dto/update-enrollment.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class EnrollmentService {
   constructor(private prisma: PrismaService) {}
 
-  // ✔
   async enroll(data: CreateEnrollmentDto) {
     const user = await this.prisma.user.findUnique({
       where: { user_id: data.userId },
@@ -19,12 +17,6 @@ export class EnrollmentService {
     if (!course)
       throw new HttpException('course not found', HttpStatus.NOT_FOUND);
 
-    // if (user?.role !== 'STUDENT')
-    //   throw new HttpException(
-    //     'You MUST switch to STUDENT account',
-    //     HttpStatus.FORBIDDEN,
-    //   );
-
     const enrollment = await this.prisma.enrollment.create({
       data: {
         userId: user.user_id,
@@ -34,7 +26,6 @@ export class EnrollmentService {
     return enrollment;
   }
 
-  // ✔
   async findAllByCourseId(course_id: string) {
     const enrollments = await this.prisma.enrollment.findMany({
       where: { courseId: course_id },
@@ -42,7 +33,6 @@ export class EnrollmentService {
     return enrollments;
   }
 
-  // ✔
   async findAllByStudentId(student_id: string) {
     const enrollments = await this.prisma.enrollment.findMany({
       where: { userId: student_id },
@@ -50,7 +40,6 @@ export class EnrollmentService {
     return enrollments;
   }
 
-  // ✔
   async findOneByStudentId(enrollment_id: string) {
     const enrollment = await this.prisma.enrollment.findUnique({
       where: { enrollment_id: enrollment_id },
@@ -65,11 +54,7 @@ export class EnrollmentService {
     return enrollment;
   }
 
-  async updateEnrollment(
-    enrollment_id: string,
-    // student_id: string,
-    completed: boolean,
-  ) {
+  async updateEnrollment(enrollment_id: string, completed: boolean) {
     const enrollment = await this.prisma.enrollment.findUnique({
       where: { enrollment_id: enrollment_id },
     });
@@ -89,10 +74,9 @@ export class EnrollmentService {
   }
 
   async delete(enrollment_id: string) {
-   const enrollment = await this.prisma.enrollment.findUnique({
+    const enrollment = await this.prisma.enrollment.findUnique({
       where: { enrollment_id: enrollment_id },
     });
-
 
     if (!enrollment)
       throw new HttpException(

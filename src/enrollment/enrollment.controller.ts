@@ -35,8 +35,6 @@ export class EnrollmentController {
       userId: user.userId,
       completed: false,
     });
-    console.log('result:', result);
-
     return { message: 'enrollment issued successfuly !', data: result };
   }
 
@@ -117,17 +115,12 @@ export class EnrollmentController {
   // Instructor routes
 
   @Get('/course/:course_id')
-  async findAllByCourse(
-    @Param() params: { course_id: string },
-    @CurrentUser() user,
-  ) {
+  async findAllByCourse(@Param('course_id') id: string, @CurrentUser() user) {
     if (user.role === 'STUDENT') {
       throw new UnauthorizedException('Access denied');
     }
 
-    const enrollments = await this.enrollmentService.findAllByCourseId(
-      params.course_id,
-    );
+    const enrollments = await this.enrollmentService.findAllByCourseId(id);
     return {
       data: enrollments,
     };

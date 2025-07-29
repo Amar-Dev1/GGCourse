@@ -41,6 +41,7 @@ CREATE TABLE `Review` (
     `review_id` VARCHAR(191) NOT NULL,
     `userId` VARCHAR(191) NOT NULL,
     `courseId` VARCHAR(191) NOT NULL,
+    `rating` INTEGER NOT NULL DEFAULT 0,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `Review_userId_courseId_key`(`userId`, `courseId`),
