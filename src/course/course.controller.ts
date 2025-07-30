@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  Res,
   UseGuards,
   UnauthorizedException,
   Query,

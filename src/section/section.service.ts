@@ -8,13 +8,11 @@ import {
 import { CreateSectionDto } from './dto/create-section.dto';
 import { UpdateSectionDto } from './dto/update-section.dto';
 import { PrismaService } from 'src/prisma.service';
-import { CourseService } from 'src/course/course.service';
 
 @Injectable()
 export class SectionService {
   constructor(
     private prisma: PrismaService,
-    private courseService: CourseService,
   ) {}
 
   async create(data: CreateSectionDto) {
@@ -36,8 +34,9 @@ export class SectionService {
 
   async findAll(course_id: string) {
     try {
-      const course = await this.courseService.findOne(course_id);
-      console.log(course);
+      const course = await this.prisma.course.findUnique({
+        where: { course_id: course_id },
+      });
 
       if (!course) {
         throw new NotFoundException('No such course');
