@@ -11,6 +11,8 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './auth/constants';
 import { PrismaModule } from './prisma.module';
+import { SectionModule } from './section/section.module';
+import { LessonModule } from './lesson/lesson.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { PrismaModule } from './prisma.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    SectionModule,
+    LessonModule,
   ],
   controllers: [AppController],
   providers: [AppService, UserService],

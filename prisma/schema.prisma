@@ -34,9 +34,27 @@ model Course {
   price Int
   instructorId String
   instructor User @relation(fields: [instructorId], references: [user_id], onDelete: Cascade)
+  sections Section[]
   enrollments Enrollment[]
   reviews Review[]
 }
+
+model Section {
+ section_id String @id @default(uuid())
+  title String
+  courseId String 
+  course Course @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
+  lessons Lesson[]
+}
+
+model Lesson{
+  id String @id @default(uuid())
+  title String
+  videoUrl String
+  sectionId String
+  section Section @relation(fields: [sectionId], references: [section_id])
+}
+
 
 model Enrollment {
   enrollment_id String @id() @default(uuid())
