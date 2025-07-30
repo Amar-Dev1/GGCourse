@@ -8,7 +8,6 @@ import {
   Delete,
   UseGuards,
   UnauthorizedException,
-  HttpException,
   NotFoundException,
 } from '@nestjs/common';
 import { EnrollmentService } from './enrollment.service';
@@ -22,7 +21,6 @@ export class EnrollmentController {
   constructor(private readonly enrollmentService: EnrollmentService) {}
 
   // Student routes
-
   @UseGuards(AuthGuard)
   @Post('/:course_id')
   async enroll(@Param('course_id') courseId: string, @CurrentUser() user) {
@@ -30,12 +28,12 @@ export class EnrollmentController {
       throw new UnauthorizedException('Only students can enroll');
     }
 
-    const result = await this.enrollmentService.enroll({
+    const enrollment = await this.enrollmentService.enroll({
       courseId,
       userId: user.userId,
       completed: false,
     });
-    return { message: 'enrollment issued successfuly !', data: result };
+    return { message: 'enrollment issued successfuly !', data: enrollment };
   }
 
   @Get('me')
@@ -120,7 +118,11 @@ export class EnrollmentController {
       throw new UnauthorizedException('Access denied');
     }
 
-    const enrollments = await this.enrollmentService.findAllByCourseId(id);
+    const enrollments = await this.enrollmentService.findAllByCourseId(
+      id,
+      user.userId,
+    );
+
     return {
       data: enrollments,
     };

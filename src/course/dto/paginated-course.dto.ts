@@ -1,14 +1,14 @@
 import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 
 export class PaginatedCourseDto {
+  @IsOptional()
   @IsNumber()
   @IsPositive()
-  @IsOptional()
   page: number;
 
+  @IsOptional()
   @IsNumber()
   @IsPositive()
-  @IsOptional()
   limit: number;
 
   @IsString()

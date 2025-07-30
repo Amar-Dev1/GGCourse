@@ -88,7 +88,7 @@ export class SectionController {
     if (user.role === 'STUDENT')
       throw new UnauthorizedException('Access denied');
 
-    const course = await this.courseService.findOne(params.course_id);
+    const course = await this.courseService.findOne(params.course_id,true);
     if (course.instructorId !== user.userId)
       throw new UnauthorizedException('Access denied');
 
@@ -113,7 +113,7 @@ export class SectionController {
     if (user.role === 'STUDENT')
       throw new UnauthorizedException('Access denied');
 
-    const course = await this.courseService.findOne(params.course_id);
+    const course = await this.courseService.findOne(params.course_id, true);
     if (course.instructorId !== user.userId)
       throw new UnauthorizedException('Access denied');
 

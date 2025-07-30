@@ -25,7 +25,7 @@ export class ValidateService {
     const lesson = await this.prisma.lesson.findFirst({
       where: {
         sectionId: section_id,
-        id: lesson_id,
+        lesson_id: lesson_id,
       },
     });
     if (!lesson)

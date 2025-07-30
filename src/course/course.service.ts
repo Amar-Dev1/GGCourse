@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -16,13 +22,10 @@ export class CourseService {
     });
 
     if (!user) {
-      throw new HttpException('Instructor not found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException('Instructor not found');
     }
     if (user.role !== 'INSTRUCTOR') {
-      throw new HttpException(
-        'You must switch your role to INSTRUCTOR',
-        HttpStatus.FORBIDDEN,
-      );
+      throw new UnauthorizedException('Students can`t create courses');
     }
 
     // 2. create the course
@@ -42,14 +45,16 @@ export class CourseService {
     const skip = (query.page - 1) * query.limit;
 
     // searching query
-    const where = query.search
-      ? {
-          OR: [
-            { title: { contains: query.search, lte: 'insensitive' } },
-            { description: { contains: query.search, lte: 'insensitive' } },
-          ],
-        }
-      : {};
+    const where = {
+      isReady: true,
+      ...(query.search && {
+        OR: [
+          { title: { contains: query.search, lte: 'insensitive' } },
+          { description: { contains: query.search, lte: 'insensitive' } },
+        ],
+      }),
+    };
+
     // pagination
     const [data, total] = await this.prisma.$transaction([
       this.prisma.course.findMany({
@@ -65,24 +70,23 @@ export class CourseService {
       totalItems: total,
       currentPage: query.page,
       pageSize: query.limit,
-      totalPages: Math.ceil(total - query.limit),
+      totalPages: Math.ceil(total / query.limit),
       data,
     };
   }
 
   async findByStudentId(student_id: string) {
     const courses = await this.prisma.course.findMany({
-      where: { enrollments: { some: { userId: student_id } } },
+      where: { enrollments: { some: { userId: student_id } }, isReady: true },
     });
     return courses;
   }
-
-  async findOne(id: string) {
-    const course = await this.prisma.course.findUnique({
-      where: { course_id: id },
+  async findOne(id: string, isAdmin: boolean) {
+    const course = await this.prisma.course.findFirst({
+      where: { course_id: id, ...(isAdmin ? {} : { isReady: true }) },
       include: { enrollments: true, reviews: true, sections: true },
     });
-    if (!course) throw new Error('course not found');
+    if (!course) throw new NotFoundException('course not found');
     return course;
   }
 
@@ -92,7 +96,7 @@ export class CourseService {
       include: { enrollments: true, reviews: true },
     });
 
-    if (!course) throw new Error('course not found');
+    if (!course) throw new NotFoundException('course not found');
 
     const result = await this.prisma.course.update({
       where: { course_id: id },
@@ -106,8 +110,7 @@ export class CourseService {
       where: { course_id: id },
       include: { enrollments: true, reviews: true },
     });
-    if (!course)
-      throw new HttpException('course not found', HttpStatus.NOT_FOUND);
+    if (!course) throw new NotFoundException('course not found');
     await this.prisma.course.delete({ where: { course_id: id } });
     return course;
   }

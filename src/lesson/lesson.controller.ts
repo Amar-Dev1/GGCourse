@@ -85,7 +85,7 @@ export class LessonController {
       throw new UnauthorizedException('Students can`t make lessons');
     }
 
-    const course = await this.courseService.findOne(params.course_id);
+    const course = await this.courseService.findOne(params.course_id, true);
 
     if (course.instructorId !== user.userId) {
       throw new UnauthorizedException('Access denied');
@@ -116,7 +116,7 @@ export class LessonController {
       throw new UnauthorizedException('Students can`t make lessons');
     }
 
-    const course = await this.courseService.findOne(params.course_id);
+    const course = await this.courseService.findOne(params.course_id, true);
 
     if (course.instructorId !== user.userId) {
       throw new UnauthorizedException('Access denied');

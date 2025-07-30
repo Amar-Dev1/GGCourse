@@ -26,9 +26,9 @@ export class EnrollmentService {
     return enrollment;
   }
 
-  async findAllByCourseId(course_id: string) {
+  async findAllByCourseId(course_id: string,user_id:string) {
     const enrollments = await this.prisma.enrollment.findMany({
-      where: { courseId: course_id },
+      where: { courseId: course_id,userId:user_id },
     });
     return enrollments;
   }
