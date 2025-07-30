@@ -14,7 +14,7 @@ export class CourseService {
       where: { user_id: data.instructorId },
       include: { enrollments: true, reviews: true },
     });
-    console.log('User:', user);
+
     if (!user) {
       throw new HttpException('Instructor not found', HttpStatus.NOT_FOUND);
     }

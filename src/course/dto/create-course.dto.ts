@@ -1,6 +1,7 @@
 import {
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   Min,
   MinLength,
@@ -17,7 +18,7 @@ export class CreateCourseDto {
   @Min(5, { message: 'Price should be at least 5$' })
   price: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   instructorId: string | any;
 }

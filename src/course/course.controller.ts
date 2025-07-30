@@ -23,38 +23,44 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @UseGuards(AuthGuard)
-  @Post()
-  async create(@Body() data: CreateCourseDto, @CurrentUser() user) {
+  @Post(':instructor_id')
+  async create(
+    @Param('instructor_id') instructor_id: string,
+    @Body() data: CreateCourseDto,
+    @CurrentUser() user,
+  ) {
     if (user.role === 'STUDENT')
       throw new UnauthorizedException('Access denied');
-    const result = await this.courseService.createCourse(data);
+    const result = await this.courseService.createCourse({
+      title: data.title,
+      description: data.description,
+      price: data.price,
+      instructorId: instructor_id,
+    });
     return {
       message: 'Course created successfully!',
       data: result,
     };
   }
-  
+
   // @UseGuards(AuthGuard)
   @Get()
   async findAll(@Query() query: PaginatedCourseDto) {
     const courses = await this.courseService.findAll(query);
     return { courses: courses };
   }
-  
+
   // only student can access
   @UseGuards(AuthGuard)
   @Get('me')
   async findByStudentId(@CurrentUser() user) {
+    if (user.role !== 'STUDENT')
+      throw new UnauthorizedException('Acces denied');
 
-      console.log(user);
-      if (user.role !== 'STUDENT')
-        throw new UnauthorizedException('Acces denied');
-  
-      const courses = await this.courseService.findByStudentId(user.userId);
-      return {
-        data: courses,
-      };
-    
+    const courses = await this.courseService.findByStudentId(user.userId);
+    return {
+      data: courses,
+    };
   }
 
   @UseGuards(AuthGuard)
@@ -73,7 +79,6 @@ export class CourseController {
     @Body() data: UpdateCourseDto,
     @CurrentUser() user,
   ) {
-    console.log(user);
 
     if (user.role === 'STUDENT')
       throw new UnauthorizedException('Access denied');
