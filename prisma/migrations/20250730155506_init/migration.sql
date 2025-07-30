@@ -19,6 +19,7 @@ CREATE TABLE `Course` (
     `title` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NOT NULL,
     `price` INTEGER NOT NULL,
+    `isReady` BOOLEAN NOT NULL DEFAULT false,
     `instructorId` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`course_id`)
@@ -35,12 +36,12 @@ CREATE TABLE `Section` (
 
 -- CreateTable
 CREATE TABLE `Lesson` (
-    `id` VARCHAR(191) NOT NULL,
+    `lesson_id` VARCHAR(191) NOT NULL,
     `title` VARCHAR(191) NOT NULL,
     `videoUrl` VARCHAR(191) NOT NULL,
     `sectionId` VARCHAR(191) NOT NULL,
 
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`lesson_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable

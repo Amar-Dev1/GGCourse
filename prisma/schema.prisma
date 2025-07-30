@@ -32,6 +32,7 @@ model Course {
   title String 
   description String
   price Int
+  isReady Boolean @default(false)
   instructorId String
   instructor User @relation(fields: [instructorId], references: [user_id], onDelete: Cascade)
   sections Section[]
@@ -48,13 +49,12 @@ model Section {
 }
 
 model Lesson{
-  id String @id @default(uuid())
+  lesson_id String @id @default(uuid())
   title String
   videoUrl String
   sectionId String
   section Section @relation(fields: [sectionId], references: [section_id])
 }
-
 
 model Enrollment {
   enrollment_id String @id() @default(uuid())

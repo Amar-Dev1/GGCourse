@@ -66,7 +66,7 @@ export class LessonService {
 
     const deleted_lesson = await this.prisma.lesson.delete({
       where: {
-        id: id,
+        lesson_id: id,
       },
     });
 
