@@ -33,6 +33,7 @@ export class CourseController {
       description: data.description,
       price: data.price,
       instructorId: user.userId,
+      isReady: data.isReady ? data.isReady : false,
     });
     return {
       message: 'Course created successfully!',

@@ -9,10 +9,14 @@ import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { PrismaService } from 'src/prisma.service';
 import { PaginatedCourseDto } from './dto/paginated-course.dto';
+import { CalculateReviews } from './calculateReviews.service';
 
 @Injectable()
 export class CourseService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private calculateReviews: CalculateReviews,
+  ) {}
 
   async createCourse(data: CreateCourseDto) {
     // 1. Check user role
@@ -35,6 +39,7 @@ export class CourseService {
         description: data.description,
         price: data.price,
         instructor: { connect: { user_id: data.instructorId } },
+        isReady: data.isReady
       },
     });
 
@@ -42,8 +47,6 @@ export class CourseService {
   }
 
   async findAll(query: PaginatedCourseDto) {
-    const skip = (query.page - 1) * query.limit;
-
     // searching query
     const where = {
       isReady: true,
@@ -54,24 +57,38 @@ export class CourseService {
         ],
       }),
     };
+    const total = await this.prisma.course.count({ where });
 
-    // pagination
-    const [data, total] = await this.prisma.$transaction([
-      this.prisma.course.findMany({
-        where,
-        skip: skip,
-        take: query.limit,
-        orderBy: { price: 'asc' },
-      }),
-      this.prisma.course.count({ where }),
-    ]);
+    const topRated = await this.prisma.review.groupBy({
+      by: ['courseId'],
+      _avg: { rating: true },
+      orderBy: [{ _avg: { rating: 'desc' } }, { courseId: 'asc' }],
+      skip: (query.page - 1) * query.limit,
+      take: query.limit,
+    });
+
+    const courseIds = topRated.map((r) => r.courseId);
+
+    const courses = await this.prisma.course.findMany({
+      where: { course_id: { in: courseIds }, isReady: true },
+      include: { reviews: true },
+    });
+
+    const sorted = courseIds.map((id, idx) => {
+      const course = courses.find((c) => c.course_id === id);
+      return {
+        ...course,
+        averageRating: topRated[idx]._avg.rating ?? 0,
+      };
+    });
+
 
     return {
       totalItems: total,
       currentPage: query.page,
       pageSize: query.limit,
       totalPages: Math.ceil(total / query.limit),
-      data,
+      data: sorted,
     };
   }
 
@@ -81,6 +98,7 @@ export class CourseService {
     });
     return courses;
   }
+
   async findOne(id: string, isAdmin: boolean) {
     const course = await this.prisma.course.findFirst({
       where: { course_id: id, ...(isAdmin ? {} : { isReady: true }) },

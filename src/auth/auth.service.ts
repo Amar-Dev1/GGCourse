@@ -22,7 +22,6 @@ export class AuthService {
       ...data,
       password: hashedPassword,
     });
-    console.log('after result');
     const { password, ...rest } = result;
     return rest;
   }

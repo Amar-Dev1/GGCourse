@@ -15,8 +15,10 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CourseService } from 'src/course/course.service';
 import { CreateSectionDto } from './dto/create-section.dto';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @UseGuards(AuthGuard)
+@SkipThrottle()
 @Controller('courses')
 export class SectionController {
   constructor(
@@ -24,7 +26,6 @@ export class SectionController {
     private readonly courseService: CourseService,
   ) {}
 
-  // ✔
   @Post(':course_id/sections')
   async create(
     @Body() data: CreateSectionDto,
@@ -46,7 +47,7 @@ export class SectionController {
       data: section,
     };
   }
-  // ✔
+
   @Get(':course_id/sections')
   async findAll(@Param('course_id') course_id: string) {
     // if (user.role === 'STUDENT') {
@@ -60,7 +61,6 @@ export class SectionController {
     };
   }
 
-  // ✔
   @Get(':course_id/:sections/:id')
   async findOne(
     @Param() params: { course_id: string; id: string },
@@ -78,7 +78,6 @@ export class SectionController {
     };
   }
 
-  // ✔
   @Patch(':course_id/:section_id/:id')
   async update(
     @Param() params: { course_id: string; id: string },
@@ -88,7 +87,7 @@ export class SectionController {
     if (user.role === 'STUDENT')
       throw new UnauthorizedException('Access denied');
 
-    const course = await this.courseService.findOne(params.course_id,true);
+    const course = await this.courseService.findOne(params.course_id, true);
     if (course.instructorId !== user.userId)
       throw new UnauthorizedException('Access denied');
 
@@ -104,7 +103,7 @@ export class SectionController {
       data: updated_section,
     };
   }
-  // ✔
+
   @Delete(':course_id/sections/:id')
   async delete(
     @Param() params: { course_id: string; id: string },

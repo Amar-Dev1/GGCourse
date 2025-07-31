@@ -14,67 +14,74 @@ enum Role {
 }
 
 model User {
-  user_id String @id() @default(uuid())
-  name String
-  email String
-  password String
-  username String @unique()
-  role Role
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt()
-  courses Course[]
+  user_id     String       @id() @default(uuid())
+  name        String
+  email       String
+  password    String
+  username    String       @unique()
+  role        Role
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt()
+  courses     Course[]
   enrollments Enrollment[]
-  reviews Review[]
+  reviews     Review[]
 }
 
 model Course {
-  course_id String @id() @default(uuid())
-  title String 
-  description String
-  price Int
-  isReady Boolean @default(false)
+  course_id    String       @id() @default(uuid())
+  title        String
+  description  String
+  price        Int
+  isReady      Boolean      @default(false)
   instructorId String
-  instructor User @relation(fields: [instructorId], references: [user_id], onDelete: Cascade)
-  sections Section[]
-  enrollments Enrollment[]
-  reviews Review[]
+  instructor   User         @relation(fields: [instructorId], references: [user_id], onDelete: Cascade)
+  sections     Section[]
+  enrollments  Enrollment[]
+  reviews      Review[]
+  created_at   DateTime     @default(now())
+  updated_at   DateTime     @updatedAt()
 }
 
 model Section {
- section_id String @id @default(uuid())
-  title String
-  courseId String 
-  course Course @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
-  lessons Lesson[]
+  section_id String   @id @default(uuid())
+  title      String
+  courseId   String
+  course     Course   @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
+  lessons    Lesson[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
 }
 
-model Lesson{
-  lesson_id String @id @default(uuid())
-  title String
-  videoUrl String
-  sectionId String
-  section Section @relation(fields: [sectionId], references: [section_id])
+model Lesson {
+  lesson_id  String   @id @default(uuid())
+  title      String
+  videoUrl   String
+  sectionId  String
+  section    Section  @relation(fields: [sectionId], references: [section_id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
 }
 
 model Enrollment {
-  enrollment_id String @id() @default(uuid())
-  userId String
-  courseId String
-  user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
-  course Course @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
-  completed Boolean @default(false)
-  enrolled_at DateTime @default(now())
+  enrollment_id String   @id() @default(uuid())
+  userId        String
+  courseId      String
+  user          User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  course        Course   @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
+  completed     Boolean  @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt()
 
   @@unique([userId, courseId])
 }
 
 model Review {
-  review_id String @id @default(uuid())
-  userId String
-  courseId String
-  rating Int @default(0)
-  user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
-  course Course @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
+  review_id  String   @id @default(uuid())
+  userId     String
+  courseId   String
+  rating     Decimal      @db.Decimal(3,1)
+  user       User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  course     Course   @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
   created_at DateTime @default(now())
 
   @@unique([userId, courseId])

@@ -21,6 +21,8 @@ CREATE TABLE `Course` (
     `price` INTEGER NOT NULL,
     `isReady` BOOLEAN NOT NULL DEFAULT false,
     `instructorId` VARCHAR(191) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`course_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -30,6 +32,8 @@ CREATE TABLE `Section` (
     `section_id` VARCHAR(191) NOT NULL,
     `title` VARCHAR(191) NOT NULL,
     `courseId` VARCHAR(191) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`section_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -40,6 +44,8 @@ CREATE TABLE `Lesson` (
     `title` VARCHAR(191) NOT NULL,
     `videoUrl` VARCHAR(191) NOT NULL,
     `sectionId` VARCHAR(191) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`lesson_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -50,7 +56,8 @@ CREATE TABLE `Enrollment` (
     `userId` VARCHAR(191) NOT NULL,
     `courseId` VARCHAR(191) NOT NULL,
     `completed` BOOLEAN NOT NULL DEFAULT false,
-    `enrolled_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `Enrollment_userId_courseId_key`(`userId`, `courseId`),
     PRIMARY KEY (`enrollment_id`)
@@ -61,7 +68,7 @@ CREATE TABLE `Review` (
     `review_id` VARCHAR(191) NOT NULL,
     `userId` VARCHAR(191) NOT NULL,
     `courseId` VARCHAR(191) NOT NULL,
-    `rating` INTEGER NOT NULL DEFAULT 0,
+    `rating` DECIMAL(3, 1) NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `Review_userId_courseId_key`(`userId`, `courseId`),

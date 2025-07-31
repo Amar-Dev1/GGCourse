@@ -58,7 +58,7 @@ export class EnrollmentService {
     const enrollment = await this.prisma.enrollment.findUnique({
       where: { enrollment_id: enrollment_id },
     });
-    console.log(enrollment);
+
     if (!enrollment)
       throw new HttpException(
         'You are not enrolled in this course',

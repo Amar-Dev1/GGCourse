@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { PrismaService } from 'src/prisma.service';
 
@@ -8,49 +14,49 @@ export class ReviewService {
 
   // student user
   async review(data: CreateReviewDto) {
-    try {
-      const course = await this.prisma.course.findUnique({
-        where: { course_id: data.courseId },
-        include: {
-          enrollments: {
-            where: {
-              userId: data.userId,
-              completed: true,
-            },
-          },
-        },
-      });
+    const course = await this.prisma.course.findUnique({
+      where: { course_id: data.courseId },
+    });
 
-      if (!course || course?.enrollments.length === 0)
-        throw new HttpException(
-          'You MUST complete the course first, So you can make a review',
-          HttpStatus.FORBIDDEN,
-        );
-
-      const existingReview = await this.prisma.review.findFirst({
-        where: {
-          courseId: data.courseId,
-          userId: data.userId,
-        },
-      });
-
-      if (existingReview)
-        throw new HttpException(
-          'You already reviewed this course ',
-          HttpStatus.CONFLICT,
-        );
-
-      const review = await this.prisma.review.create({ data: {
-        userId:data.userId,
-        courseId:data.courseId,
-        
-      } });
-      return review;
-    } catch (err) {
-      console.log(err);
-
-      throw err;
+    if (!course) {
+      throw new NotFoundException('Course not found');
     }
+
+    const enrollment = await this.prisma.enrollment.findFirst({
+      where: {
+        courseId: data.courseId,
+        userId: data.userId,
+        completed: true,
+      },
+    });
+
+    if (!enrollment) {
+      throw new UnauthorizedException(
+        'You MUST complete the course first, so you can make a review',
+      );
+    }
+
+    const existingReview = await this.prisma.review.findFirst({
+      where: {
+        courseId: data.courseId,
+        userId: data.userId,
+      },
+    });
+
+    if (existingReview)
+      throw new HttpException(
+        'You already reviewed this course ',
+        HttpStatus.CONFLICT,
+      );
+
+    const review = await this.prisma.review.create({
+      data: {
+        userId: data.userId,
+        courseId: data.courseId,
+        rating: data.rating,
+      },
+    });
+    return review;
   }
 
   // instructor user

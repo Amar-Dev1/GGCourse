@@ -16,10 +16,16 @@ export class CreateCourseDto {
   @IsString()
   @MinLength(5, { message: 'Description should be at least 5 characters' })
   description: string;
+
+  @IsNumber()
   @Min(5, { message: 'Price should be at least 5$' })
   price: number;
 
   @IsOptional()
   @IsString()
   instructorId: string | any;
+
+  @IsOptional()
+  @IsBoolean()
+  isReady: boolean;
 }

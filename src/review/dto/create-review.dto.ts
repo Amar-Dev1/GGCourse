@@ -1,6 +1,8 @@
 import {
+  IsBoolean,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Max,
@@ -18,8 +20,12 @@ export class CreateReviewDto {
   @IsString()
   courseId: string;
 
-  @IsInt({ message: 'the rate should be a number' })
+  @IsNumber()
   @Min(1, { message: 'the rate must be 1 at least' })
   @Max(5, { message: 'the rate must be 5 at most' })
   rating: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isReady: boolean;
 }

@@ -5,11 +5,14 @@ import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class UserService {
-constructor(private prisma :PrismaService){}
+  constructor(private prisma: PrismaService) {}
 
   async createUser(data: CreateUserDto) {
     if (!data.password || typeof data.password !== 'string') {
-      throw new HttpException('Password is required and must be a string', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Password is required and must be a string',
+        HttpStatus.BAD_REQUEST,
+      );
     }
     const user = await this.prisma.user.create({
       data: {
@@ -19,29 +22,50 @@ constructor(private prisma :PrismaService){}
         role: data.role,
         password: data.password,
       },
-    });    
+    });
     return user;
   }
   async findAll() {
     const users = await this.prisma.user.findMany({
-      include: { enrollments: true, reviews: true },
+      omit: {
+        password: true,
+        created_at: true,
+        updated_at: true,
+      },
     });
+
     return users;
   }
   async findOneById(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { user_id: id },
-      include: { enrollments: true, reviews: true },
+    });
+    if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+
+    const result = await this.prisma.user.findUnique({
+      where: { user_id: id },
+      select: {
+        user_id:true,
+        name: true,
+        email: true,
+        username: true,
+        role: true,
+        courses: user?.role === 'INSTRUCTOR' ? true : false,
+        enrollments: user?.role === 'STUDENT' ? true : false,
+        reviews: user.role === 'STUDENT' ? true : false,
+      },
     });
 
-    if (!user) throw new HttpException("user not found", HttpStatus.NOT_FOUND);
-    return user;
+    return result;
   }
   async findOneByEmail(email: string) {
     const user = await this.prisma.user.findFirst({
       where: { email: email },
+      omit: {
+        created_at: true,
+        updated_at: true,
+      },
     });
-    console.log(user);
     if (!user) return false;
     return user;
   }
@@ -55,11 +79,13 @@ constructor(private prisma :PrismaService){}
       data: {
         name: data.name,
         email: data.email,
+        password: data.password,
         username: data.username,
         role: data.role,
       },
     });
-    return updatedUser;
+    const { password, ...rest } = updatedUser;
+    return rest;
   }
   async deleteUser(id: any) {
     const user = await this.findOneById(id);

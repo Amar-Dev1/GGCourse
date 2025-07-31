@@ -13,6 +13,8 @@ import { jwtConstants } from './auth/constants';
 import { PrismaModule } from './prisma.module';
 import { SectionModule } from './section/section.module';
 import { LessonModule } from './lesson/lesson.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -22,18 +24,37 @@ import { LessonModule } from './lesson/lesson.module';
     ReviewModule,
     UserModule,
     PrismaModule,
+    SectionModule,
+    LessonModule,
     JwtModule.register({
-      global:true,
-      secret:jwtConstants.secret,
-      signOptions:{expiresIn:'10d'}
+      global: true,
+      secret: jwtConstants.secret,
+      signOptions: { expiresIn: '10d' },
     }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    SectionModule,
-    LessonModule,
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 1_000,
+          limit: 3,
+        },
+        {
+          ttl: 60_000,
+          limit: 40,
+        },
+      ],
+    }),
   ],
   controllers: [AppController],
-  providers: [AppService, UserService],
+  providers: [
+    AppService,
+    UserService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

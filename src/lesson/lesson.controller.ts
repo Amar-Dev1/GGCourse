@@ -15,8 +15,10 @@ import { UpdateLessonDto } from './dto/update-lesson.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { CourseService } from 'src/course/course.service';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @UseGuards(AuthGuard)
+@SkipThrottle()
 @Controller('courses')
 export class LessonController {
   constructor(
@@ -24,7 +26,6 @@ export class LessonController {
     private courseService: CourseService,
   ) {}
 
-  // ✔
   @Post(':course_id/sections/:section_id/lessons')
   async create(
     @Param() params: { course_id: string; section_id: string },
@@ -46,7 +47,7 @@ export class LessonController {
       data: lesson,
     };
   }
-  // ✔
+
   @Get(':course_id/sections/:section_id/lessons')
   async findAll(@Param() params: { course_id: string; section_id: string }) {
     const lessons = await this.lessonService.findAll(
@@ -59,7 +60,6 @@ export class LessonController {
     };
   }
 
-  // ✔
   @Get(':course_id/sections/:section_id/lessons/:id')
   async findOne(
     @Param() params: { course_id: string; section_id: string; id: string },
@@ -74,7 +74,7 @@ export class LessonController {
       data: lesson,
     };
   }
-  // ✔
+
   @Patch(':course_id/sections/:section_id/lessons/:id')
   async update(
     @Param() params: { course_id: string; section_id: string; id: string },
@@ -106,7 +106,7 @@ export class LessonController {
       data: updated_lesson,
     };
   }
-  // ✔
+
   @Delete(':course_id/sections/:section_id/lessons/:id')
   async remove(
     @Param() params: { course_id: string; section_id: string; id: string },

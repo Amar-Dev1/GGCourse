@@ -33,7 +33,8 @@ export class ReviewController {
     const result = await this.reviewService.review({
       userId: user.userId,
       courseId: course_id,
-      rating: data.rating,
+      rating: Math.round(data.rating * 10) / 10,
+      isReady: data.isReady ? data.isReady : false,
     });
 
     return { message: 'review made successfuly !', data: result };
