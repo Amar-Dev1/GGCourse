@@ -64,9 +64,7 @@ You can explore the complete list of API endpoints for **GGCourse** via **Swagge
 
 ---
 
-## 🧠 My Thoughts & Suggestions
+### 💡 Ideas in mind:
 
-### 💡 ideas in mind:
-
-- **email notifications** for enrollment, course publishing, and completion.
-- **caching** (e.g., Redis) to improve search and listing performance at scale.
+- Implement **email notifications** for enrollment, course publishing, and completion.
+- Utilizing **caching** to improve search and listing performance at scale.
