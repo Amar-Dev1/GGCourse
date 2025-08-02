@@ -39,6 +39,7 @@ export class LessonController {
     const lesson = await this.lessonService.create(params.course_id, {
       title: data.title,
       videoUrl: data.videoUrl,
+      description: data.description ? data.description : '',
       sectionId: params.section_id,
     });
 
@@ -96,6 +97,7 @@ export class LessonController {
       params.id,
       {
         title: data.title,
+        description: data.description ? data.description : '',
         videoUrl: data.videoUrl,
         sectionId: params.section_id,
       },
@@ -108,7 +110,7 @@ export class LessonController {
   }
 
   @Delete(':course_id/sections/:section_id/lessons/:id')
-  async remove(
+  async delete(
     @Param() params: { course_id: string; section_id: string; id: string },
     @CurrentUser() user,
   ) {
@@ -130,6 +132,26 @@ export class LessonController {
     return {
       message: 'Lesson deleted successfuly !',
       data: deleted_lesson,
+    };
+  }
+}
+
+@UseGuards(AuthGuard)
+@SkipThrottle()
+@Controller('lessons')
+export class CompleteLessonController {
+  constructor(private lessonService: LessonService) {}
+
+  @Post(':lesson_id/complete')
+  async completeLesson(@Param('lesson_id') id: string, @CurrentUser() user) {
+    if (user.role === 'INSTRUCTOR') {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    const data = await this.lessonService.completeLesson(id, user.userId);
+
+    return {
+      data
     };
   }
 }

@@ -50,13 +50,18 @@ export class CourseController {
   // only student can access
   @Get('me')
   async findByStudentId(@CurrentUser() user) {
-    if (user.role !== 'STUDENT') {
-      throw new UnauthorizedException('Acces denied');
+    if (user.role === 'STUDENT') {
+      const courses = await this.courseService.findByStudentId(user.userId);
+      return {
+        data: courses,
+      };
+    } else if (user.role === 'INSTRUCTOR') {
+      const courses = await this.courseService.findByInstructorId(user.userId);
+      return {
+        data: courses,
+      };
     }
-    const courses = await this.courseService.findByStudentId(user.userId);
-    return {
-      data: courses,
-    };
+    throw new UnauthorizedException('Access denied');
   }
 
   @Get(':id')

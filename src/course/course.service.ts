@@ -1,6 +1,4 @@
 import {
-  HttpException,
-  HttpStatus,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -9,13 +7,11 @@ import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { PrismaService } from 'src/prisma.service';
 import { PaginatedCourseDto } from './dto/paginated-course.dto';
-import { CalculateReviews } from './calculateReviews.service';
 
 @Injectable()
 export class CourseService {
   constructor(
     private prisma: PrismaService,
-    private calculateReviews: CalculateReviews,
   ) {}
 
   async createCourse(data: CreateCourseDto) {
@@ -39,7 +35,7 @@ export class CourseService {
         description: data.description,
         price: data.price,
         instructor: { connect: { user_id: data.instructorId } },
-        isReady: data.isReady
+        isReady: data.isReady,
       },
     });
 
@@ -82,7 +78,6 @@ export class CourseService {
       };
     });
 
-
     return {
       totalItems: total,
       currentPage: query.page,
@@ -95,6 +90,14 @@ export class CourseService {
   async findByStudentId(student_id: string) {
     const courses = await this.prisma.course.findMany({
       where: { enrollments: { some: { userId: student_id } }, isReady: true },
+    });
+    return courses;
+  }
+  async findByInstructorId(instructor_id: string) {
+    const courses = await this.prisma.course.findMany({
+      where: {
+        instructorId: instructor_id,
+      },
     });
     return courses;
   }

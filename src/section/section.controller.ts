@@ -39,6 +39,7 @@ export class SectionController {
 
     const section = await this.sectionService.create({
       title: data.title,
+      description: data.description ? data.description : '',
       courseId: course_id,
     });
 
@@ -96,6 +97,7 @@ export class SectionController {
       params.id,
       {
         title: data.title,
+        description: data.description ? data.description : '',
       },
     );
     return {

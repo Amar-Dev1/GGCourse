@@ -23,6 +23,7 @@ model User {
   created_at  DateTime     @default(now())
   updated_at  DateTime     @updatedAt()
   courses     Course[]
+  lessonProgresses LessonProgress[]
   enrollments Enrollment[]
   reviews     Review[]
 }
@@ -40,39 +41,61 @@ model Course {
   reviews      Review[]
   created_at   DateTime     @default(now())
   updated_at   DateTime     @updatedAt()
-}
 
-model Section {
-  section_id String   @id @default(uuid())
-  title      String
-  courseId   String
-  course     Course   @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
-  lessons    Lesson[]
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt()
-}
+  @@index([instructorId])
 
-model Lesson {
-  lesson_id  String   @id @default(uuid())
-  title      String
-  videoUrl   String
-  sectionId  String
-  section    Section  @relation(fields: [sectionId], references: [section_id])
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt()
 }
 
 model Enrollment {
   enrollment_id String   @id() @default(uuid())
   userId        String
   courseId      String
+  completed     Boolean  @default(false)
   user          User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
   course        Course   @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
-  completed     Boolean  @default(false)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt()
 
   @@unique([userId, courseId])
+}
+
+model Section {
+  section_id String   @id @default(uuid())
+  title      String
+  description String?
+  courseId   String
+  course     Course   @relation(fields: [courseId], references: [course_id], onDelete: Cascade)
+  lessons    Lesson[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  @@index([courseId])
+}
+
+model Lesson {
+  lesson_id  String   @id @default(uuid())
+  title      String
+  description String?
+  videoUrl   String
+  sectionId  String
+  lessonProgresses LessonProgress[]
+  section    Section  @relation(fields: [sectionId], references: [section_id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+  
+  @@index([sectionId])
+}
+
+
+model LessonProgress{
+  id String @id() @default(uuid())
+  userId String
+  lessonId String
+  user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [lesson_id], onDelete: Cascade)
+  completed Boolean @default(false)
+
+@@unique([userId, lessonId])
 }
 
 model Review {
