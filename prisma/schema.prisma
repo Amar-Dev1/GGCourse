@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -34,6 +34,8 @@ model Course {
   description  String
   price        Int
   isReady      Boolean      @default(false)
+  publication_date DateTime? @default(now())
+  average_review_score Decimal? @db.Decimal(3,1)
   instructorId String
   instructor   User         @relation(fields: [instructorId], references: [user_id], onDelete: Cascade)
   sections     Section[]

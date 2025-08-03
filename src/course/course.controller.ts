@@ -15,7 +15,7 @@ import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { PaginatedCourseDto } from './dto/paginated-course.dto';
+import { CourseQueryDto } from './dto/course-query-.dto';
 
 @UseGuards(AuthGuard)
 @Controller('courses')
@@ -32,8 +32,7 @@ export class CourseController {
       title: data.title,
       description: data.description,
       price: data.price,
-      instructorId: user.userId,
-      isReady: data.isReady ? data.isReady : false,
+      instructorId: user.userId, 
     });
     return {
       message: 'Course created successfully!',
@@ -42,7 +41,7 @@ export class CourseController {
   }
 
   @Get()
-  async findAll(@Query() query: PaginatedCourseDto) {
+  async findAll(@Query() query: CourseQueryDto) {
     const courses = await this.courseService.findAll(query);
     return { courses: courses };
   }
@@ -81,6 +80,7 @@ export class CourseController {
     @Body() data: UpdateCourseDto,
     @CurrentUser() user,
   ) {
+    
     if (user.role === 'STUDENT')
       throw new UnauthorizedException('Access denied');
 

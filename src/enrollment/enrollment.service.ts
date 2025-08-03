@@ -10,8 +10,8 @@ export class EnrollmentService {
     const user = await this.prisma.user.findUnique({
       where: { user_id: data.userId },
     });
-    const course = await this.prisma.course.findUnique({
-      where: { course_id: data.courseId },
+    const course = await this.prisma.course.findFirst({
+      where: { course_id: data.courseId,isReady:true },
     });
     if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
     if (!course)

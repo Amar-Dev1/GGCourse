@@ -27,5 +27,8 @@ export class CreateCourseDto {
 
   @IsOptional()
   @IsBoolean()
-  isReady: boolean;
+  isReady?: boolean;
+
+  @IsOptional()
+  publication_date?:string;
 }

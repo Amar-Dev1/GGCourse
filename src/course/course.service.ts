@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -6,13 +7,11 @@ import {
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { PrismaService } from 'src/prisma.service';
-import { PaginatedCourseDto } from './dto/paginated-course.dto';
+import { CourseQueryDto } from './dto/course-query-.dto';
 
 @Injectable()
 export class CourseService {
-  constructor(
-    private prisma: PrismaService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async createCourse(data: CreateCourseDto) {
     // 1. Check user role
@@ -29,62 +28,66 @@ export class CourseService {
     }
 
     // 2. create the course
-    const result = await this.prisma.course.create({
+    const course = await this.prisma.course.create({
       data: {
         title: data.title,
         description: data.description,
         price: data.price,
         instructor: { connect: { user_id: data.instructorId } },
-        isReady: data.isReady,
       },
     });
 
-    return result;
+    return course;
   }
 
-  async findAll(query: PaginatedCourseDto) {
-    // searching query
-    const where = {
-      isReady: true,
-      ...(query.search && {
-        OR: [
-          { title: { contains: query.search, lte: 'insensitive' } },
-          { description: { contains: query.search, lte: 'insensitive' } },
-        ],
-      }),
-    };
-    const total = await this.prisma.course.count({ where });
+  async findAll(query: CourseQueryDto) {
+    try {
+      const { page = 1, limit = 10, sorted_by = 'newest', search } = query;
 
-    const topRated = await this.prisma.review.groupBy({
-      by: ['courseId'],
-      _avg: { rating: true },
-      orderBy: [{ _avg: { rating: 'desc' } }, { courseId: 'asc' }],
-      skip: (query.page - 1) * query.limit,
-      take: query.limit,
-    });
+      let take = Number(limit);
+      let skip = (Number(page) - 1) * take;
 
-    const courseIds = topRated.map((r) => r.courseId);
+      let orderBy = {};
 
-    const courses = await this.prisma.course.findMany({
-      where: { course_id: { in: courseIds }, isReady: true },
-      include: { reviews: true },
-    });
-
-    const sorted = courseIds.map((id, idx) => {
-      const course = courses.find((c) => c.course_id === id);
-      return {
-        ...course,
-        averageRating: topRated[idx]._avg.rating ?? 0,
+      const where: any = {
+        isReady: true,
       };
-    });
 
-    return {
-      totalItems: total,
-      currentPage: query.page,
-      pageSize: query.limit,
-      totalPages: Math.ceil(total / query.limit),
-      data: sorted,
-    };
+      if (search) {
+        const filter = {
+         contains:search,
+          mode : "insensitive"
+        }
+        where.OR = [{ title: filter }, { description: filter }];
+      }
+
+      if (sorted_by === 'reviews') {
+        where.reviews = { some: {} };
+      }
+
+      orderBy =
+        sorted_by === 'reviews'
+          ? { average_review_score: 'desc' }
+          : { publication_date: 'desc' };
+
+      const courses = await this.prisma.course.findMany({
+        where,
+        orderBy,
+        take,
+        skip,
+      });
+      const total = await this.prisma.course.count({ where });
+
+      return {
+        total,
+        currentPage: page,
+        pageSize: query.limit,
+        data: courses,
+      };
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   async findByStudentId(student_id: string) {
@@ -114,14 +117,28 @@ export class CourseService {
   async updateCourse(id: string, data: UpdateCourseDto) {
     const course = await this.prisma.course.findUnique({
       where: { course_id: id },
-      include: { enrollments: true, reviews: true },
+      include: { enrollments: true, sections: { include: { lessons: true } } },
     });
 
     if (!course) throw new NotFoundException('course not found');
 
+    const becomingPublished = !course.isReady && data.isReady === true;
+
+    if (becomingPublished) {
+      const allLessons = course.sections.flatMap((l) => l.lessons);
+      if (allLessons.length === 0) {
+        throw new BadRequestException(
+          'Cannot publish course without any lessons',
+        );
+      }
+    }
+
     const result = await this.prisma.course.update({
       where: { course_id: id },
-      data: data,
+      data: {
+        ...data,
+        ...(becomingPublished && { publication_date: new Date() }),
+      },
     });
     return result;
   }

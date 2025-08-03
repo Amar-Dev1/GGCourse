@@ -56,7 +56,27 @@ export class ReviewService {
         rating: data.rating,
       },
     });
+
+    await this.updateCourseAverageScore(review.courseId);
+
     return review;
+  }
+
+  // student user
+  private async updateCourseAverageScore(course_id: string) {
+    const averatgeReviews = await this.prisma.review.aggregate({
+      where: { courseId: course_id },
+      _avg: { rating: true },
+    });
+
+    await this.prisma.course.update({
+      where: {
+        course_id: course_id,
+      },
+      data: {
+        average_review_score: averatgeReviews._avg.rating?.toNumber() ?? 0,
+      },
+    });
   }
 
   // instructor user
