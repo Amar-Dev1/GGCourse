@@ -1,4 +1,10 @@
-import { IsEmail, IsIn, IsNotEmpty } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -13,5 +19,8 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @IsIn(['STUDENT', 'INSTRUCTOR', 'ADMIN'])
-  role: "STUDENT" | "INSTRUCTOR" | "ADMIN";
+  role: 'STUDENT' | 'INSTRUCTOR' | 'ADMIN';
+  @IsOptional()
+  @IsString()
+  adminKey?: string;
 }

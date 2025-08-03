@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -14,6 +20,20 @@ export class UserService {
         HttpStatus.BAD_REQUEST,
       );
     }
+    if (data.role === 'ADMIN') {
+      if (data.adminKey) {
+        // checking if its really admin or not
+        const itsReallyAdmin =
+          data.adminKey === (process.env.ADMIN_KEY as string);
+        if (!itsReallyAdmin)
+          throw new BadRequestException('You can`t be admin lol...');
+      } else if (!data.adminKey) {
+        throw new BadRequestException(
+          'You MUST provide the admin key if you want to be an Admin',
+        );
+      }
+    }
+
     const user = await this.prisma.user.create({
       data: {
         name: data.name,
@@ -45,7 +65,7 @@ export class UserService {
     const result = await this.prisma.user.findUnique({
       where: { user_id: id },
       select: {
-        user_id:true,
+        user_id: true,
         name: true,
         email: true,
         username: true,
@@ -74,6 +94,21 @@ export class UserService {
     // 1. checking user first
     const user = await this.prisma.user.findUnique({ where: { user_id: id } });
     if (!user) return null;
+
+    if (user.role !== 'ADMIN' && data.role === 'ADMIN') {
+      if (data.adminKey) {
+        // checking if its really admin or not
+        const itsReallyAdmin =
+          data.adminKey === (process.env.ADMIN_KEY as string);
+        if (!itsReallyAdmin)
+          throw new BadRequestException('You can`t be admin lol...');
+      } else if (!data.adminKey) {
+        throw new BadRequestException(
+          'You MUST provide the admin key if you want to be an Admin',
+        );
+      }
+    }
+
     const updatedUser = await this.prisma.user.update({
       where: { user_id: id },
       data: {

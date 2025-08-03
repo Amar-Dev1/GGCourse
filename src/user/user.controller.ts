@@ -7,6 +7,7 @@ import {
   UseGuards,
   Delete,
   UnauthorizedException,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -26,10 +27,10 @@ export class UserController {
     const result = await this.userService.findAll();
     return { data: result };
   }
-  
+
   @UseGuards(AuthGuard)
   @Get(':id')
-  async findOne(@Param() params:{id:string}, @CurrentUser() user) {
+  async findOne(@Param() params: { id: string }, @CurrentUser() user) {
     if (user.role !== 'ADMIN' && params.id !== user.userId)
       throw new UnauthorizedException('Access denied');
     const result = await this.userService.findOneById(params.id);
@@ -39,15 +40,23 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Patch(':id')
   async updateUser(
-    @Body() data: UpdateUserDto,
+    @Body() data:UpdateUserDto,
     @Param() params: { id: string },
     @CurrentUser() user,
   ) {
-    if (user.role !== 'ADMIN' && params.id !== user.userId)
-      throw new UnauthorizedException('Access denined');
+    try {
+      if (user.role !== 'ADMIN' && params.id !== user.userId)
+        throw new UnauthorizedException('Access denined');
 
-    const result = await this.userService.updateUser(params.id, data);
-    return { message: 'updated Successfuly !', data: result };
+      const result = await this.userService.updateUser(
+        params.id,
+        data,
+      );
+      return { message: 'updated Successfuly !', data: result };
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   @UseGuards(AuthGuard)
