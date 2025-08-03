@@ -58,7 +58,7 @@ You can explore the complete list of API endpoints for **GGCourse** via **Swagge
 * 🧠 **Main Language:** TypeScript
 * 🚀 **Backend Framework:** NestJS
 * 🔗 **API Type:** RESTful APIs
-* 🗄️ **Database & ORM:** MySQL + Prisma
+* 🗄️ **Database & ORM:** PostgresSQL + Prisma
 * 🐳 **Containerization:** Docker
 * 🧾 **API Documentation:** Swagger
 
@@ -66,8 +66,7 @@ You can explore the complete list of API endpoints for **GGCourse** via **Swagge
 
 ## 🧠 My Thoughts & Suggestions
 
-### 💡 Future ideas to implement:
+### 💡 ideas in mind:
 
 - **email notifications** for enrollment, course publishing, and completion.
 - **caching** (e.g., Redis) to improve search and listing performance at scale.
-- **unit/integration tests** to ensure system reliability.
