@@ -15,14 +15,14 @@ services:
       - postgres-data:/var/lib/postgresql/data
 
   ggcourse-api:
-    build: ./api
+    build: ./main-api
     container_name: ggcourse-api-container
     ports:
       - "3000:3000"
     depends_on: 
       - db
     env_file:
-      - ./api/.env
+      - ./main-api/.env
     environment:
       DATABASE_URL: "postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/GGCourse?schema=public"
 

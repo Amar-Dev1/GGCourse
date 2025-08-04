@@ -62,7 +62,7 @@ You can explore the complete list of API endpoints for **GGCourse** via **Swagge
 
 ---
 
-![API](./src/AllEndpoints.png)
+![API](./main-api/src/AllEndpoints.png)
 
 ### 💡 Ideas in mind:
 
