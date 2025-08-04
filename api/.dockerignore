@@ -1,0 +1,11 @@
+# Git and Docker files
+.git
+.gitignore
+Dockerfile
+
+# Dependencies and build output
+node_modules
+dist
+
+# Environment files
+.env

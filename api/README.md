@@ -43,13 +43,6 @@ The platform empowers educators to share knowledge while enabling learners to ac
 * 🗃️ **Enrollment Tracking** with automatic course completion updates
 * 🌟 **Course Review System** allowing students to rate and review completed courses
 
----
-
-## 📡 4. API Endpoints
-
-You can explore the complete list of API endpoints for **GGCourse** via **Swagger**:
-
-👉 [**View Full API Documentation**](https://someurl.here)
 
 ---
 
@@ -60,9 +53,17 @@ You can explore the complete list of API endpoints for **GGCourse** via **Swagge
 * 🔗 **API Type:** RESTful APIs
 * 🗄️ **Database & ORM:** PostgresSQL + Prisma
 * 🐳 **Containerization:** Docker
-* 🧾 **API Documentation:** Swagger
+* 🧾 **API Documentation:** Swagger UI
 
 ---
+
+## 📡 4. API Endpoints
+
+You can explore the complete list of API endpoints for **GGCourse** via **Swagger**:
+  
+---
+
+![API](./src/AllEndpoints.png)
 
 ### 💡 Ideas in mind:
 
